@@ -35,5 +35,16 @@
         "path": "./syntaxes/prose.tmLanguage.json"
       }
     ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.3",
+    "@types/vscode": "^1.95.0",
+    "tslint": "^5.20.1",
+    "typescript": "^5.7.2"
   }
 }
