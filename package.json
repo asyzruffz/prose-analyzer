@@ -1,8 +1,9 @@
 {
   "name": "prose",
   "displayName": "Prose",
-  "description": "Syntax highlighting for prose lang",
+  "description": "Syntax highlighting for Prose lang",
   "version": "0.0.1",
+  "publisher": "Ruffz",
   "engines": {
     "vscode": "^1.95.0"
   },
