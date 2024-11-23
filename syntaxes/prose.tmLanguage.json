@@ -1,0 +1,73 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Prose",
+	"scopeName": "source.prose",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#datatypes"
+		},
+		{
+			"include": "#variables"
+		},
+		{
+			"include": "#primitives"
+		},
+		{
+			"include": "#numbers"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.prose",
+				"match": "\\b(for|hence|as|is|so|the|to|when|and|not|or)\\b"
+			}]
+		},
+		"datatypes": {
+			"patterns": [{
+				"name": "storage.type.prose",
+				"match": "\\b(adjective|noun|verb|number|text)\\b"
+			}]
+		},
+		"variables": {
+			"patterns": [{
+				"name": "variable.language.prose",
+				"match": "\\b(it)\\b"
+			}]
+		},
+		"primitives": {
+			"patterns": [{
+				"name": "constant.language.prose",
+				"match": "\\b(false|true)\\b"
+			}]
+		},
+		"numbers": {
+			"name": "constant.numeric.prose",
+			"begin": "\\[",
+			"end": "\\]",
+			"patterns": [
+				{
+					"name": "constant.numeric.prose",
+					"match": "\\d+(?:\\.\\d+)?"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.prose",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.prose",
+					"match": "\\\\."
+				}
+			]
+		}
+	}
+}
