@@ -1,18 +1,11 @@
 import * as vscode from 'vscode';
-import { tokenTypes, tokenModifiers } from './ProseTokensLegend';
-
-interface IParsedToken {
-	line: number;
-	startCharacter: number;
-	length: number;
-	tokenType: string;
-	tokenModifiers: string[];
-}
+import { tokenTypes, tokenModifiers } from './legend';
+import { parse } from './parser';
 
 export default class ProseDocumentTokensProvider implements vscode.DocumentSemanticTokensProvider {
 
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, _token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const allTokens = this._parseText(document.getText());
+		const allTokens = parse(document.getText());
 		const builder = new vscode.SemanticTokensBuilder();
 		allTokens.forEach((token) => {
 			builder.push(token.line, token.startCharacter, token.length, this._encodeTokenType(token.tokenType), this._encodeTokenModifiers(token.tokenModifiers));
@@ -39,43 +32,5 @@ export default class ProseDocumentTokensProvider implements vscode.DocumentSeman
 			}
 		}
 		return result;
-	}
-
-	private _parseText(text: string): IParsedToken[] {
-		const r: IParsedToken[] = [];
-		const lines = text.split(/\r\n|\r|\n/);
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			let currentOffset = 0;
-			do {
-				const openOffset = line.indexOf('[', currentOffset);
-				if (openOffset === -1) {
-					break;
-				}
-				const closeOffset = line.indexOf(']', openOffset);
-				if (closeOffset === -1) {
-					break;
-				}
-				const tokenData = this._parseTextToken(line.substring(openOffset + 1, closeOffset));
-				r.push({
-					line: i,
-					startCharacter: openOffset + 1,
-					length: closeOffset - openOffset - 1,
-					tokenType: tokenData.tokenType,
-					tokenModifiers: tokenData.tokenModifiers
-				});
-				currentOffset = closeOffset;
-				// eslint-disable-next-line no-constant-condition
-			} while (true);
-		}
-		return r;
-	}
-
-	private _parseTextToken(text: string): { tokenType: string; tokenModifiers: string[]; } {
-		const parts = text.split('.');
-		return {
-			tokenType: parts[0],
-			tokenModifiers: parts.slice(1)
-		};
 	}
 }
