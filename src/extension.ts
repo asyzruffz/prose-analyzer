@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import ProseDocumentTokensProvider from './ProseDocumentTokensProvider';
-import { legend } from './ProseTokensLegend';
+import { legend } from './legend';
 
 export function activate(context: vscode.ExtensionContext) {
 
