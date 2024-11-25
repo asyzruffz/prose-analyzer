@@ -1,10 +1,11 @@
+import { tokenTypes, tokenModifiers } from './legend';
 
 interface IParsedToken {
 	line: number;
 	startCharacter: number;
 	length: number;
-	tokenType: string;
-	tokenModifiers: string[];
+	tokenType: number;
+	tokenModifiers: number;
 }
 
 export function parse(text: string): IParsedToken[] {
@@ -83,10 +84,37 @@ function scanToken(text: string): string {
     return text.substring(0, end);
 }
 
-function identifyToken(text: string): { type: string; modifiers: string[]; } {
+function identifyToken(text: string): { type: number; modifiers: number; } {
+    if (text.length === 0) {
+        return { type: encodeTokenType("notInLegend"), modifiers: 0 };
+    }
+    if (text.startsWith("!")) {
+        return { type: encodeTokenType("comment"), modifiers: encodeTokenModifiers(["documentation"]) };
+    }
     const parts = text.split('.');
     return {
-        type: parts[0],
-        modifiers: parts.slice(1)
+        type: encodeTokenType(parts[0]),
+        modifiers: encodeTokenModifiers(parts.slice(1))
     };
+}
+
+function encodeTokenType(tokenType: string): number {
+    if (tokenTypes.has(tokenType)) {
+        return tokenTypes.get(tokenType)!;
+    } else if (tokenType === "notInLegend") {
+        return tokenTypes.size + 2;
+    }
+    return 0;
+}
+
+function encodeTokenModifiers(strTokenModifiers: string[]): number {
+    let result = 0;
+    for (const tokenModifier of strTokenModifiers) {
+        if (tokenModifiers.has(tokenModifier)) {
+            result = result | (1 << tokenModifiers.get(tokenModifier)!);
+        } else if (tokenModifier === "notInLegend") {
+            result = result | (1 << tokenModifiers.size + 2);
+        }
+    }
+    return result;
 }
