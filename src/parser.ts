@@ -22,6 +22,12 @@ export function parse(text: string): IParsedToken[] {
             const token = scanToken(line.substring(currentOffset));
             const tokenInfo = identifyToken(token);
 
+            // Skip empty tokens
+            if (token.length === 0) {
+                currentOffset++;
+                continue;
+            }
+
             tokens.push({
                 line: i,
                 startCharacter: openOffset + 1,
@@ -37,17 +43,44 @@ export function parse(text: string): IParsedToken[] {
 }
 
 function scanToken(text: string): string {
-    let start = 0;
     let end = 0;
-    while (end < text.length && text[end] !== ' ' && text[end] !== '\t' && text[end] !== '\r' && text[end] !== '\n') {
-        // Start comments with '!'
-        if (text[end] === '!') {
+    let enclosed = false;
+    while (end < text.length) {
+        const character = text[end];
+
+        // Check if character is alphanumeric
+        if (character >= 'a' && character <= 'z' ||
+            character >= 'A' && character <= 'Z' ||
+            character >= '0' && character <= '9' ||
+            character === "_" || enclosed) {
+            end++;
+            continue;
+        }
+
+        if (character === " " || character === "\t" || character === "\r" || character === "\n") {
+            // Ignore whitespace
+            break;
+        } else if (character === "[") {
+            enclosed = true;
+            end++;
+        } else if (character === "\"") { // Handle text
+            enclosed = !enclosed;
+            if (enclosed) { end++; }
+            else { end++; break; }
+        } else if (character === "<" || character === "\t") { // Handle 2 characters token
+            const next = text[end + 1];
+            if (next === "=") { end += 2; }
+            else { end++; }
+            break;
+        } else if (character === "!") { // Start comments with '!'
             end = text.length;
             break;
+        } else { // Stop with only one character
+            end++;
+            break;
         }
-        end++;
     }
-    return text.substring(start, end);
+    return text.substring(0, end);
 }
 
 function identifyToken(text: string): { type: string; modifiers: string[]; } {
