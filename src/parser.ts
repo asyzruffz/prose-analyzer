@@ -49,26 +49,28 @@ function scanToken(text: string): string {
     while (end < text.length) {
         const character = text[end];
 
-        // Check if character is alphanumeric
         if (character >= 'a' && character <= 'z' ||
             character >= 'A' && character <= 'Z' ||
             character >= '0' && character <= '9' ||
-            character === "_" || enclosed) {
+            character === "_") { // Continue if character is alphanumeric
             end++;
-            continue;
-        }
-
-        if (character === " " || character === "\t" || character === "\r" || character === "\n") {
-            // Ignore whitespace
-            break;
-        } else if (character === "[") {
-            enclosed = true;
-            end++;
-        } else if (character === "\"") { // Handle text
+        } else if (character === "\"") { // Handle text within quotes
             enclosed = !enclosed;
             if (enclosed) { end++; }
             else { end++; break; }
+        } else if (character === "]") { // Handle number within brackets
+            enclosed = false;
+            end++;
+            break;
+        } else if (enclosed) {
+            end++;
+        } else if (character === " " || character === "\t" || character === "\r" || character === "\n") {
+            if (!enclosed) { break; } // Ignore whitespace
+        } else if (character === "[") { // Handle number within brackets
+            enclosed = true;
+            end++;
         } else if (character === "<" || character === "\t") { // Handle 2 characters token
+            if (end + 1 >= text.length) { end++; break; }
             const next = text[end + 1];
             if (next === "=") { end += 2; }
             else { end++; }
@@ -77,7 +79,7 @@ function scanToken(text: string): string {
             end = text.length;
             break;
         } else { // Stop with only one character
-            end++;
+            if (end === 0) { end++; }
             break;
         }
     }
@@ -91,11 +93,36 @@ function identifyToken(text: string): { type: number; modifiers: number; } {
     if (text.startsWith("!")) {
         return { type: encodeTokenType("comment"), modifiers: encodeTokenModifiers(["documentation"]) };
     }
-    const parts = text.split('.');
-    return {
-        type: encodeTokenType(parts[0]),
-        modifiers: encodeTokenModifiers(parts.slice(1))
-    };
+
+    if (text.startsWith("\"")) {
+        return { type: encodeTokenType("string"), modifiers: 0 };
+    }
+    if (text.startsWith("[")) {
+        return { type: encodeTokenType("number"), modifiers: 0 };
+    }
+
+    const operators = ["(", ")", "{", "}", ",", ".", "-", "+", "*", "/", "=", "~", "<", ">", "!"];
+    for (const operator of operators) {
+        if (text.startsWith(operator)) {
+            return { type: encodeTokenType("operator"), modifiers: 0 };
+        }
+    }
+
+    const keywords = [ "for", "hence", "as", "is", "so", "the", "to", "when", "and", "not", "or"];
+    for (const keyword of keywords) {
+        if (text === keyword) {
+            return { type: encodeTokenType("keyword"), modifiers: 0 };
+        }
+    }
+
+    const types = ["noun", "verb", "adjective", "number", "text", "it", "false", "true"];
+    for (const type of types) {
+        if (text === type) {
+            return { type: encodeTokenType("notInLegend"), modifiers: 0 };
+        }
+    }
+
+    return { type: encodeTokenType("variable"), modifiers: 0 };
 }
 
 function encodeTokenType(tokenType: string): number {
