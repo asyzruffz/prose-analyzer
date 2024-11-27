@@ -31,7 +31,7 @@ export function parse(text: string): IParsedToken[] {
 
             tokens.push({
                 line: i,
-                startCharacter: openOffset + 1,
+                startCharacter: openOffset,
                 length: token.length,
                 tokenType: tokenInfo.type,
                 tokenModifiers: tokenInfo.modifiers
